@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // On n'accède aux données qu'en connaissant l'identifiant secret du tableau,
+    // c'est-à-dire la partie du lien après le #.
+    match /boards/{board}/{coll}/{doc} {
+      allow read, write: if board.size() >= 20 && coll in ['props', 'meta'];
+    }
+  }
+}

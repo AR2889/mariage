@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mariage">
+<meta name="theme-color" content="#0f5f55">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<meta name="robots" content="noindex,nofollow">
+<title>Nos Choix de Mariage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout : colonne unique type appli iPhone — en-tête, budget, onglets de catégories, liste classée, bouton flottant « Proposer ». */
+:root{
+  --bg:#f4f3ef; --surface:#ffffff; --surface-2:#ecebe5; --ink:#1c2626; --muted:#66706e; --line:#dcdcd4;
+  --accent:#0f5f55; --accent-ink:#ffffff; --accent-soft:#dcebe7;
+  --gold:#a87a22; --gold-soft:#f5ead3;
+  --abdel:#2f4f86; --abdel-soft:#e2e8f4; --nora:#8a3d5c; --nora-soft:#f4e3ea;
+  --danger:#a8322b;
+  --shadow:0 1px 2px rgba(20,40,38,.06),0 4px 14px rgba(20,40,38,.06);
+  --f-display:"Marcellus","Cormorant Garamond",Georgia,serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#172020; --surface-2:#1f2a29; --ink:#e7eeec; --muted:#97a5a2; --line:#2b3837;
+  --accent:#4fb3a2; --accent-ink:#06211d; --accent-soft:#183a35;
+  --gold:#d8ad57; --gold-soft:#3a2f17;
+  --abdel:#9cb6ea; --abdel-soft:#1f2b42; --nora:#e7a1bd; --nora-soft:#3d2230;
+  --danger:#ef8a82; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#172020; --surface-2:#1f2a29; --ink:#e7eeec; --muted:#97a5a2; --line:#2b3837;
+  --accent:#4fb3a2; --accent-ink:#06211d; --accent-soft:#183a35;
+  --gold:#d8ad57; --gold-soft:#3a2f17;
+  --abdel:#9cb6ea; --abdel-soft:#1f2b42; --nora:#e7a1bd; --nora-soft:#3d2230;
+  --danger:#ef8a82; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 120px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{padding-top:22px;display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,8vw,40px);line-height:1.05;margin:0;text-wrap:balance}
+.who{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.abdel{background:var(--abdel-soft);color:var(--abdel)}
+.pill.nora{background:var(--nora-soft);color:var(--nora)}
+.notice{font-size:13px;background:var(--surface-2);border-radius:10px;padding:10px 12px;color:var(--muted)}
+.notice[data-kind="warn"]{background:var(--gold-soft);color:var(--ink)}
+
+/* Budget */
+.budget{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.budget-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.budget-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.budget-fig{font-variant-numeric:tabular-nums;font-weight:600;font-size:17px}
+.budget-fig small{font-weight:500;color:var(--muted);font-size:13px}
+.bar{height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .3s}
+.bar.over>i{background:var(--danger)}
+.budget-rows{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px;font-variant-numeric:tabular-nums}
+.budget-rows span:nth-child(even){text-align:right;color:var(--muted)}
+.budget-edit{display:flex;gap:8px;align-items:center}
+.budget-edit input{width:140px}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:600;font-size:13px}
+
+/* Onglets */
+.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:2px max(16px,env(safe-area-inset-left,0px))}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}
+.tab .n{font-variant-numeric:tabular-nums;font-size:12px;color:var(--muted);font-weight:600}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab[aria-selected="true"] .n{color:var(--bg);opacity:.7}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+
+.cat-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.cat-head h2{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0}
+.cat-head p{margin:0;font-size:13px;color:var(--muted)}
+
+/* Cartes */
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;display:grid;grid-template-columns:auto 1fr;gap:0;overflow:hidden;box-shadow:var(--shadow)}
+.card.chosen{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),var(--shadow)}
+.rank{width:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;padding:14px 0;background:var(--surface-2);font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.card.chosen .rank{background:var(--gold-soft);color:var(--gold)}
+.handle{border:0;background:none;padding:6px;color:var(--muted);touch-action:none;cursor:grab;line-height:0}
+.handle svg{width:18px;height:18px}
+.body{min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.photo{width:100%;max-width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:var(--surface-2);display:block}
+.row1{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.title{font-weight:700;font-size:16px;margin:0;overflow-wrap:anywhere}
+.price{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.desc{margin:0;color:var(--muted);font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.meta a{color:var(--accent);font-weight:600;text-decoration:none;overflow-wrap:anywhere}
+.badge-chosen{background:var(--gold);color:var(--surface);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 12px;font-weight:600;font-size:13px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.gold{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn[disabled]{opacity:.5;cursor:default}
+.sortable-ghost{opacity:.35}
+.sortable-chosen .card,.sortable-chosen.card{box-shadow:0 10px 30px rgba(0,0,0,.18)}
+
+.empty{border:1.5px dashed var(--line);border-radius:14px;padding:26px 18px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty strong{color:var(--ink);font-family:var(--f-display);font-weight:400;font-size:20px}
+
+/* Bouton flottant */
+.fab{position:fixed;right:max(16px,calc(env(safe-area-inset-right,0px) + 16px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:20;
+  background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:14px 20px;font-weight:700;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.22);display:flex;gap:8px;align-items:center}
+
+/* Feuille de saisie */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:640px;max-height:92%;overflow-y:auto;border-radius:18px 18px 0 0;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 18px) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.sheet h3{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+input[type=text],input[type=url],input[type=number],textarea,select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;font-size:16px}
+textarea{min-height:80px;resize:vertical}
+.photo-pick{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.photo-pick img{width:96px;height:64px;object-fit:cover;border-radius:8px}
+.sheet-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.err{color:var(--danger);font-size:13px;margin:0}
+.price small{display:block;font-weight:500;font-size:12px;color:var(--muted);text-align:right}
+.price.quote{color:var(--muted);font-weight:500;font-size:13px}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.budget-edit{flex-wrap:wrap}
+.budget-edit label{font-size:13px;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:4px}
+/* Pays du voyage */
+.countries{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.countries-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.countries-head h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.countries-head span{font-size:12px;color:var(--muted)}
+.clist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.crow{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:6px 8px}
+.crow .num{font-family:var(--f-display);font-size:18px;width:24px;text-align:center;color:var(--accent);font-variant-numeric:tabular-nums}
+.crow .cname{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.crow .x{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;padding:4px 6px}
+.cform{display:flex;gap:8px}
+.cform input{flex:1;min-width:0}
+.cempty{font-size:13px;color:var(--muted);margin:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 84px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:40}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Nos choix de mariage</h1>
+    <div class="who" id="who">Connexion…</div>
+  </header>
+
+  <div class="notice" id="notice" hidden></div>
+
+  <section class="budget" id="budget" aria-label="Budget"></section>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Catégories"></nav>
+
+  <section id="catSection" style="display:flex;flex-direction:column;gap:12px">
+    <div class="cat-head"><h2 id="catTitle"></h2><p id="catHint"></p></div>
+    <div class="countries" id="countries" hidden></div>
+    <ul class="list" id="list"></ul>
+  </section>
+</div>
+
+<button class="fab" id="fab" type="button" hidden>
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+  Proposer
+</button>
+
+<div id="sheetRoot"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ===== À REMPLIR : configuration Firebase (Paramètres du projet > Vos applications > Web) ===== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC_XsRCeW3sagkxwxigK9_I15o5KV2THag",
+  authDomain: "mariage-8db18.firebaseapp.com",
+  projectId: "mariage-8db18",
+  storageBucket: "mariage-8db18.firebasestorage.app",
+  messagingSenderId: "386216605094",
+  appId: "1:386216605094:web:cada6bf760088f2efccb67"
+};
+</script>
+<script>
+const CATS = [
+  {id:"walima",  label:"Salle de mariage", short:"Salle", hint:"Lieux de réception", empty:"Ajoutez une première salle avec le bouton « Proposer »."},
+  {id:"traiteur",label:"Traiteur & menu", short:"Traiteur", hint:"Prestataires, plats, pâtisseries", empty:"Ajoutez un premier traiteur ou un menu avec le bouton « Proposer »."},
+  {id:"voyage",  label:"Voyage de noces", short:"Voyage", hint:"Destinations et hôtels", empty:"Ajoutez une première destination avec le bouton « Proposer »."},
+  {id:"tenues",  label:"Tenues", short:"Tenues", hint:"Robes, takchita, costume", empty:"Ajoutez une première tenue avec le bouton « Proposer »."},
+  {id:"deco",    label:"Décoration", short:"Déco", hint:"Thème, fleurs, table, lumières", empty:"Ajoutez une première idée de décoration avec le bouton « Proposer »."},
+  {id:"dot",     label:"Dot", short:"Dot", hint:"Parure et cadeaux du mahr", empty:"Ajoutez une première proposition de parure avec le bouton « Proposer »."},
+];
+const S = { db:null, user:null, me:null, canWrite:false, props:[], order:{}, chosen:{}, budget:null,
+  cat:"walima", dragging:false, pendingRender:false, editingBudget:false, guests:null, countries:[] };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur = n => (n==null||isNaN(n)) ? "" : new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+const isNora = () => S.me === "nora";
+const NAME = {abdel:"Abdel", nora:"Nora"};
+
+try { const c = localStorage.getItem("cat"); if (CATS.some(x=>x.id===c)) S.cat = c; } catch(e){}
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,2200); }
+
+/* ---------- Données dérivées ---------- */
+function propsOf(cat){
+  const list = S.props.filter(p => p.cat === cat);
+  const ord = S.order[cat] || [];
+  const pos = id => { const i = ord.indexOf(id); return i < 0 ? Infinity : i; };
+  return list.sort((a,b) => (pos(a.id) - pos(b.id)) || ((a.createdAt||0) - (b.createdAt||0)));
+}
+function totalOf(p){ if (!p || p.price == null) return null; if (!p.perPerson) return p.price; return S.guests ? p.price * S.guests : null; }
+function priceHtml(p){
+  if (p.price == null) return '<span class="price quote">Sur devis</span>';
+  if (!p.perPerson) return `<span class="price">${eur(p.price)}</span>`;
+  const t = totalOf(p);
+  return `<span class="price">${eur(p.price)}/pers${t!=null ? `<small>≈ ${eur(t)} pour ${S.guests}</small>` : ""}</span>`;
+}
+function chosenProp(cat){ const id = S.chosen[cat]; return id ? S.props.find(p => p.id === id && p.cat === cat) : null; }
+
+/* ---------- Rendu ---------- */
+function render(){
+  if (S.dragging){ S.pendingRender = true; return; }
+  renderWho(); renderBudget(); renderTabs(); renderList(); renderCountries();
+}
+function renderWho(){
+  const w = $("#who");
+  if (!S.me){ w.textContent = "Lecture seule"; return; }
+  w.innerHTML = `Vous êtes <span class="pill ${S.me}">${NAME[S.me]}</span> ${isNora() ? "· c'est vous qui classez" : "· Nora classe, vous proposez"}`;
+}
+function renderBudget(){
+  const el = $("#budget");
+  let total = 0; const rows = [];
+  CATS.forEach(c => { const p = chosenProp(c.id); const t = totalOf(p); if (t != null) total += t;
+    const lbl = !p ? "à choisir" : (t != null ? eur(t) : (p.price == null ? "retenu, sur devis" : `${eur(p.price)}/pers · nombre d'invités ?`));
+    rows.push(`<span>${esc(c.short)}</span><span>${lbl}</span>`); });
+  const b = S.budget;
+  const pct = b ? Math.min(100, Math.round(total / b * 100)) : 0;
+  const over = b && total > b;
+  if (S.editingBudget){
+    el.innerHTML = `<span class="budget-label">Budget global</span>
+      <form class="budget-edit" id="budgetForm">
+        <label>Budget (€)<input type="number" id="budgetInput" inputmode="numeric" min="0" step="100" placeholder="ex. 15000" value="${b ?? ""}"></label>
+        <label>Invités<input type="number" id="guestsInput" inputmode="numeric" min="0" step="1" placeholder="ex. 150" value="${S.guests ?? ""}" style="width:100px"></label>
+        <div style="display:flex;gap:8px;align-self:flex-end"><button class="btn primary" type="submit">Enregistrer</button><button class="btn" type="button" id="budgetCancel">Annuler</button></div></form>`;
+    $("#budgetForm").onsubmit = async e => { e.preventDefault(); const v = $("#budgetInput").value.trim(); const g = $("#guestsInput").value.trim();
+      await saveBudget(v === "" ? null : Math.max(0, Number(v)), g === "" ? null : Math.max(0, Math.round(Number(g)))); };
+    $("#budgetCancel").onclick = () => { S.editingBudget = false; renderBudget(); };
+    $("#budgetInput").focus();
+    return;
+  }
+  el.innerHTML = `
+    <div class="budget-top">
+      <span class="budget-label">Choix retenus</span>
+      <span class="budget-fig">${eur(total) || "0 €"} <small>${b ? "sur " + eur(b) : "· aucun budget fixé"}</small></span>
+    </div>
+    <div style="font-size:13px;color:var(--muted)">${S.guests ? S.guests + " invités prévus" : "Nombre d'invités non renseigné"}</div>
+    ${b ? `<div class="bar ${over?"over":""}" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>` : ""}
+    ${over ? `<div class="notice" data-kind="warn">Dépassement de ${eur(total - b)}.</div>` : (b ? `<div style="font-size:13px;color:var(--muted)">Reste ${eur(b - total)}</div>` : "")}
+    <div class="budget-rows">${rows.join("")}</div>
+    ${S.canWrite ? `<div><button class="linkbtn" id="budgetBtn" type="button">${b || S.guests ? "Modifier budget et invités" : "Fixer le budget et les invités"}</button></div>` : ""}`;
+  const bb = $("#budgetBtn"); if (bb) bb.onclick = () => { S.editingBudget = true; renderBudget(); };
+}
+function renderTabs(){
+  $("#tabs").innerHTML = CATS.map(c => {
+    const n = S.props.filter(p => p.cat === c.id).length;
+    return `<button class="tab" role="tab" type="button" data-cat="${c.id}" aria-selected="${c.id===S.cat}">
+      ${chosenProp(c.id) ? '<span class="dot" title="Choix retenu"></span>' : ""}${esc(c.short)} <span class="n">${n}</span></button>`;
+  }).join("");
+  $("#tabs").querySelectorAll(".tab").forEach(b => b.onclick = () => { S.cat = b.dataset.cat; try{localStorage.setItem("cat",S.cat)}catch(e){} render(); });
+}
+const HANDLE = `<svg viewBox="0 0 18 18" aria-hidden="true"><g fill="currentColor"><circle cx="6" cy="4" r="1.6"/><circle cx="12" cy="4" r="1.6"/><circle cx="6" cy="9" r="1.6"/><circle cx="12" cy="9" r="1.6"/><circle cx="6" cy="14" r="1.6"/><circle cx="12" cy="14" r="1.6"/></g></svg>`;
+let sortable = null;
+function renderList(){
+  const c = CATS.find(x => x.id === S.cat);
+  $("#catTitle").textContent = c.label;
+  const items = propsOf(S.cat);
+  $("#catHint").textContent = items.length > 1 ? (isNora() ? "Glissez ⋮⋮ pour classer" : "Ordre choisi par Nora") : c.hint;
+  const ul = $("#list");
+  if (sortable){ sortable.destroy(); sortable = null; }
+  if (!items.length){
+    ul.innerHTML = `<li class="empty"><strong>Aucune proposition</strong><span>${esc(c.empty)}</span></li>`;
+    return;
+  }
+  const chosenId = S.chosen[S.cat];
+  ul.innerHTML = items.map((p,i) => {
+    const mine = p.by === S.me;
+    const chosen = p.id === chosenId;
+    const link = /^https?:\/\//i.test(p.link || "") ? p.link : "";
+    let host = ""; try { host = link ? new URL(link).hostname.replace(/^www\./,"") : ""; } catch(e){}
+    return `<li class="card ${chosen?"chosen":""}" data-id="${esc(p.id)}">
+      <div class="rank"><span>${i+1}</span>${isNora() && S.canWrite && items.length>1 ? `<button class="handle" type="button" aria-label="Déplacer">${HANDLE}</button>` : ""}</div>
+      <div class="body">
+        ${p.photo ? `<img class="photo" src="${esc(p.photo)}" alt="">` : ""}
+        <div class="row1"><h3 class="title">${esc(p.title)}</h3>${priceHtml(p)}</div>
+        ${p.desc ? `<p class="desc">${esc(p.desc)}</p>` : ""}
+        <div class="meta">
+          ${chosen ? '<span class="badge-chosen">Retenu</span>' : ""}
+          <span class="pill ${p.by==="nora"?"nora":"abdel"}">${NAME[p.by] || "?"}</span>
+          ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener">${esc(host || "Voir le lien")} ↗</a>` : ""}
+        </div>
+        ${S.canWrite ? `<div class="actions">
+          ${isNora() ? `<button class="btn ${chosen?"gold":"primary"}" type="button" data-act="choose">${chosen ? "Ne plus retenir" : "Retenir ce choix"}</button>` : ""}
+          ${(mine || S.me==="abdel") ? `<button class="btn" type="button" data-act="edit">Modifier</button><button class="btn danger" type="button" data-act="del">Supprimer</button>` : ""}
+        </div>` : ""}
+      </div></li>`;
+  }).join("");
+  ul.querySelectorAll("[data-act]").forEach(b => b.onclick = e => onAction(b, b.closest(".card").dataset.id));
+  if (isNora() && S.canWrite && items.length > 1 && window.Sortable){
+    sortable = Sortable.create(ul, { handle:".handle", animation:160, ghostClass:"sortable-ghost",
+      onStart(){ S.dragging = true; },
+      onEnd(){ S.dragging = false;
+        const ids = [...ul.querySelectorAll(".card")].map(li => li.dataset.id);
+        saveOrder(S.cat, ids);
+        if (S.pendingRender){ S.pendingRender = false; }
+        render();
+      }});
+  }
+}
+
+/* ---------- Pays du voyage ---------- */
+let csortable = null;
+function renderCountries(){
+  const el = $("#countries");
+  if (csortable){ csortable.destroy(); csortable = null; }
+  if (S.cat !== "voyage"){ el.hidden = true; return; }
+  el.hidden = false;
+  const draft = $("#cInput") ? $("#cInput").value : "";
+  const L = S.countries;
+  el.innerHTML = `<div class="countries-head"><h3>Pays envisagés</h3><span>${L.length > 1 && S.canWrite ? "Glissez ⋮⋮ pour ordonner" : ""}</span></div>
+    ${L.length ? `<ol class="clist" id="clist">${L.map((c,i) => `<li class="crow" data-id="${esc(c.id)}">
+        <span class="num">${i+1}</span><span class="cname">${esc(c.name)}</span>
+        <span class="pill ${c.by==="nora"?"nora":"abdel"}">${NAME[c.by]||"?"}</span>
+        ${S.canWrite && (c.by === S.me || S.me === "abdel") ? `<button class="x" type="button" data-cid="${esc(c.id)}" aria-label="Retirer ${esc(c.name)}">×</button>` : ""}
+        ${S.canWrite && L.length > 1 ? `<button class="handle" type="button" aria-label="Déplacer">${HANDLE}</button>` : ""}</li>`).join("")}</ol>`
+      : `<p class="cempty">Aucun pays pour l'instant. Ajoutez-en un ci-dessous, puis classez-les du plus au moins envie.</p>`}
+    ${S.canWrite ? `<form class="cform" id="cForm"><input type="text" id="cInput" maxlength="60" placeholder="ex. Turquie" aria-label="Pays"><button class="btn primary" type="submit">Ajouter</button></form>` : ""}`;
+  const inp = $("#cInput"); if (inp && draft) inp.value = draft;
+  const f = $("#cForm");
+  if (f) f.onsubmit = async e => { e.preventDefault(); const name = $("#cInput").value.trim(); if (!name) return;
+    if (L.some(c => c.name.toLowerCase() === name.toLowerCase())){ toast("Ce pays est déjà dans la liste"); return; }
+    const next = [...L, {id: "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6), name, by: S.me}];
+    $("#cInput").value = ""; await saveCountries(next) && toast(name + " ajouté"); };
+  el.querySelectorAll("[data-cid]").forEach(b => b.onclick = () => saveCountries(L.filter(c => c.id !== b.dataset.cid)));
+  const ol = $("#clist");
+  if (ol && S.canWrite && L.length > 1 && window.Sortable){
+    csortable = Sortable.create(ol, { handle:".handle", animation:160, ghostClass:"sortable-ghost",
+      onStart(){ S.dragging = true; },
+      onEnd(){ S.dragging = false; const ids = [...ol.querySelectorAll(".crow")].map(li => li.dataset.id);
+        const byId = Object.fromEntries(L.map(c => [c.id, c])); saveCountries(ids.map(id => byId[id]).filter(Boolean)); } });
+  }
+}
+let cWriting = Promise.resolve(true);
+function saveCountries(list){
+  S.countries = list; render();
+  cWriting = cWriting.then(() => write(S.db.doc("meta/countries"), {list}));
+  return cWriting;
+}
+
+/* ---------- Actions ---------- */
+async function onAction(btn, id){
+  const p = S.props.find(x => x.id === id); if (!p) return;
+  const act = btn.dataset.act;
+  if (act === "choose"){
+    const next = {...S.chosen, [p.cat]: S.chosen[p.cat] === id ? null : id};
+    S.chosen = next; render();
+    await write(S.db.doc("meta/chosen"), next) && toast(next[p.cat] ? "Choix retenu" : "Choix retiré");
+  } else if (act === "edit"){
+    openSheet(p);
+  } else if (act === "del"){
+    if (btn.dataset.armed){
+      await write(S.db.doc("props/" + id), null, "delete") && toast("Proposition supprimée");
+      if (S.chosen[p.cat] === id){ const next = {...S.chosen, [p.cat]: null}; S.chosen = next; await write(S.db.doc("meta/chosen"), next); }
+    } else { btn.dataset.armed = "1"; btn.textContent = "Confirmer la suppression"; setTimeout(()=>{ if(btn.isConnected){ delete btn.dataset.armed; btn.textContent="Supprimer"; }},4000); }
+  }
+}
+let orderWriting = Promise.resolve();
+function saveOrder(cat, ids){
+  S.order = {...S.order, [cat]: ids};
+  const body = S.order;
+  orderWriting = orderWriting.then(() => write(S.db.doc("meta/order"), body));
+}
+async function saveBudget(v, g){
+  S.budget = v; S.guests = g; S.editingBudget = false; render();
+  await write(S.db.doc("meta/budget"), {amount: v, guests: g}) && toast("Enregistré");
+}
+async function write(ref, body, kind="set"){
+  try { if (kind === "delete") await ref.delete(); else await ref.set(body); return true; }
+  catch(e){
+    if (e && e.code === "permission-denied"){ setReadOnly("Ce lien n'est pas valide. Utilisez le lien complet envoyé par Abdel."); }
+    else if (e && e.code === "resource-exhausted") toast("Quota gratuit atteint pour aujourd'hui, réessayez demain.");
+    else toast("Enregistrement impossible, réessayez.");
+    return false;
+  }
+}
+function setReadOnly(msg){ S.canWrite = false; $("#fab").hidden = true; const n=$("#notice"); n.textContent = msg; n.hidden = false; render(); }
+
+/* ---------- Photo : compression pour rester léger ---------- */
+function compress(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onerror = () => rej(new Error("read"));
+    r.onload = () => { const img = new Image(); img.onerror = () => rej(new Error("img"));
+      img.onload = () => {
+        const tryAt = (max, q) => { const k = Math.min(1, max / Math.max(img.width, img.height));
+          const cv = document.createElement("canvas"); cv.width = Math.round(img.width*k); cv.height = Math.round(img.height*k);
+          cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); return cv.toDataURL("image/jpeg", q); };
+        let d = tryAt(900, .72); if (d.length > 170000) d = tryAt(700, .62); if (d.length > 170000) d = tryAt(520, .55);
+        res(d); };
+      img.src = r.result; };
+    r.readAsDataURL(file);
+  });
+}
+
+/* ---------- Feuille d'ajout / modification ---------- */
+function openSheet(p){
+  const editing = !!p; let photo = p?.photo || null;
+  const root = $("#sheetRoot");
+  root.innerHTML = `<div class="sheet-bg" id="sheetBg"><form class="sheet" id="propForm" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">${editing ? "Modifier la proposition" : "Nouvelle proposition"}</h3>
+    <div class="field"><label for="f-cat">Catégorie</label><select id="f-cat">${CATS.map(c=>`<option value="${c.id}" ${c.id===(p?.cat||S.cat)?"selected":""}>${esc(c.label)}</option>`).join("")}</select></div>
+    <div class="field"><label for="f-title">Titre</label><input type="text" id="f-title" maxlength="120" required value="${esc(p?.title||"")}" placeholder="ex. Salle Al Andalous, Vaulx-en-Velin"></div>
+    <div class="field"><label for="f-desc">Description</label><textarea id="f-desc" maxlength="1500" placeholder="Capacité, ambiance, ce qui vous plaît…">${esc(p?.desc||"")}</textarea></div>
+    <div class="field"><label for="f-photo">Photo</label><div class="photo-pick"><img id="f-prev" alt="" ${photo?`src="${esc(photo)}"`:"hidden"}><input type="file" id="f-photo" accept="image/*"><button class="linkbtn" type="button" id="f-rmphoto" ${photo?"":"hidden"}>Retirer la photo</button></div></div>
+    <div class="field"><label for="f-link">Lien</label><input type="url" id="f-link" inputmode="url" value="${esc(p?.link||"")}" placeholder="https://…"></div>
+    <div class="field"><label for="f-price">Prix (€) — vide si sur devis</label><input type="number" id="f-price" inputmode="numeric" min="0" step="1" value="${p?.price ?? ""}" placeholder="ex. 4500">
+      <label class="check" for="f-pp"><input type="checkbox" id="f-pp" ${p?.perPerson ? "checked" : ""}> Prix par personne</label></div>
+    <p class="err" id="f-err" hidden></p>
+    <div class="sheet-actions"><button class="btn" type="button" id="f-cancel">Annuler</button><button class="btn primary" type="submit" id="f-save">${editing ? "Enregistrer" : "Ajouter"}</button></div>
+  </form></div>`;
+  const close = () => root.innerHTML = "";
+  $("#f-cancel").onclick = close;
+  $("#sheetBg").onclick = e => { if (e.target.id === "sheetBg") close(); };
+  $("#f-photo").onchange = async e => { const f = e.target.files[0]; if (!f) return;
+    try { photo = await compress(f); $("#f-prev").src = photo; $("#f-prev").hidden = false; $("#f-rmphoto").hidden = false; }
+    catch(err){ const er=$("#f-err"); er.textContent="Cette image n'a pas pu être lue. Essayez une photo JPEG ou PNG."; er.hidden=false; } };
+  $("#f-rmphoto").onclick = () => { photo = null; $("#f-prev").hidden = true; $("#f-rmphoto").hidden = true; $("#f-photo").value = ""; };
+  $("#propForm").onsubmit = async e => {
+    e.preventDefault();
+    const title = $("#f-title").value.trim(); const err = $("#f-err");
+    if (!title){ err.textContent = "Donnez un titre à la proposition."; err.hidden = false; return; }
+    let link = $("#f-link").value.trim(); if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
+    const pr = $("#f-price").value.trim();
+    const body = { cat: $("#f-cat").value, title, desc: $("#f-desc").value.trim(), link, price: pr === "" ? null : Math.max(0, Number(pr)), perPerson: $("#f-pp").checked,
+      photo, by: p?.by || S.me, createdAt: p?.createdAt || Date.now() };
+    $("#f-save").disabled = true;
+    const ref = editing ? S.db.doc("props/" + p.id) : S.db.collection("props").doc();
+    const ok = await write(ref, body);
+    if (ok){ if (body.cat !== S.cat){ S.cat = body.cat; } close(); toast(editing ? "Modifications enregistrées" : "Proposition ajoutée"); render(); }
+    else $("#f-save").disabled = false;
+  };
+  setTimeout(() => $("#f-title").focus(), 50);
+}
+$("#fab").onclick = () => openSheet(null);
+
+/* ---------- Démarrage ---------- */
+const SEED = {"props": [{"id": "halal-gastronomie-lyon", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000002, "desc": "Fournisseurs certifiés AVS, SFCVH et Mosquée de Lyon, traçabilité sur demande. Mariages de 20 à 500 convives, service à table ou buffet. Formules 45 €, 65 € (la plus choisie) ou 95 € par personne. Déplacement hors Rhône-Alpes avec supplément : Moulins à demander.", "link": "https://www.halalgastronomie.fr/", "perPerson": true, "photo": null, "price": 65, "title": "Halal Gastronomie, Lyon"}, {"id": "halal-lara-moon", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000004, "desc": "Présenté comme traiteur halal pour mariages. Plutôt buffet sucré-salé, petits fours et pièce montée : en complément d'un traiteur repas. 5/5 sur 76 avis Google. Halal et tarifs à confirmer.\nTél. 06 29 79 87 03", "link": "", "photo": null, "price": null, "title": "Lara Moon Event, Clermont-Ferrand"}, {"id": "halal-maison-levant", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000003, "desc": "Cuisine libanaise, halal indiqué (sans certification précisée). À partir de 45 € par personne : service à table, buffet ou cocktail dînatoire. Se déplace jusqu'à Vichy, Moulins à demander. Contact via la fiche.", "link": "https://www.evenementielpourtous.com/maison-du-levant-144710", "perPerson": true, "photo": null, "price": 45, "title": "Maison du Levant, Chamalières"}, {"id": "halal-nadia-cuisine", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000001, "desc": "Traiteur marocain annoncé 100 % halal, tout fait maison (bastilla, chebakia…). Grand buffet pour mariage. Prix sur devis. Intervient autour de Clermont : déplacement à Moulins (~1 h) à demander.\nTél. / WhatsApp 07 55 83 14 35", "link": "https://www.nadiacuisine.fr/", "photo": null, "price": null, "title": "Nadia Cuisine, Clermont-Ferrand"}, {"id": "moulins-beauvoir", "by": "abdel", "cat": "walima", "createdAt": 1793245600002, "desc": "À ~30 min de Moulins. Week-end à partir de 6 500 €, hébergement non compris (fourchette annoncée 6 500 à 15 000 €). Formule un jour en semaine (mardi ou mercredi) dès 3 800 €. Orangerie jusqu'à 300 assis, logement pour ~60 invités. Pas de cuisine sur place, traiteur libre. Des avis signalent des frais en plus (ménage). 4,7/5 sur 237 avis Google.\nTél. 06 70 04 89 67", "link": "https://www.beauvoir-bourbonnais.fr/", "photo": null, "price": 6500, "title": "Château de Beauvoir, Saint-Pourçain-sur-Besbre"}, {"id": "moulins-domaine-pierre", "by": "abdel", "cat": "walima", "createdAt": 1793245600004, "desc": "À ~20 min de Moulins. Location à partir de 3 000 € (jusqu'à 4 000 €), gîtes compris du vendredi après-midi au lundi matin. Tables, chaises et vaisselle incluses, cuisine pro pour le traiteur. 40 à 130 invités maximum. 4,8/5 sur 23 avis Google.\nTél. 06 32 04 75 45", "link": "https://domainedelapierre.com/", "photo": null, "price": 3000, "title": "Domaine de la Pierre, Thiel-sur-Acolin"}, {"id": "moulins-grange-ecuyer", "by": "abdel", "cat": "walima", "createdAt": 1793245600006, "desc": "À ~15 min de Moulins. Salle vide dès 450 €. Jusqu'à 110 personnes assises (150 en cocktail), gîte sur place. Pour un format plus intime. 4,7/5 sur 47 avis Google.\nTél. 06 82 93 45 30", "link": "", "photo": null, "price": 450, "title": "La Grange de l'Écuyer, Chemilly"}, {"id": "moulins-menards", "by": "abdel", "cat": "walima", "createdAt": 1793245600001, "desc": "À ~20 min de Moulins. Formule mariage 1 250 € du vendredi matin au dimanche soir : salle, tables, chaises, vaisselle. Salle seule dès 600 €, pergola sur devis. 200 personnes en salle, plus la pergola. 14 couchages sur place. Traiteur extérieur autorisé. 4,8/5 sur 124 avis Google.\nTél. 07 84 27 66 54", "link": "https://domainedesmenards.fr", "photo": null, "price": 1250, "title": "Domaine des Ménards, Chevagnes"}, {"id": "moulins-pagats", "by": "abdel", "cat": "walima", "createdAt": 1793245600005, "desc": "À ~40 min de Moulins, vers Vichy. Salle décorée, plusieurs gîtes et espaces extérieurs. Tarif non publié : devis à demander. 4,9/5 sur 49 avis Google.\nTél. 06 19 94 21 24", "link": "", "photo": null, "price": null, "title": "Domaine des Pagats, Montaigu-le-Blin"}, {"id": "moulins-vieux-melays", "by": "abdel", "cat": "walima", "createdAt": 1793245600003, "desc": "À 5 min de Moulins. Location à partir de 3 800 € (fourchette 3 800 à 4 800 €), tables et chaises sur devis. Lieu privatisé, accès la veille pour installer. Jusqu'à 299 invités, parc de 8 ha. Traiteur libre, boissons sans droit de bouchon. 4,7/5 sur 99 avis Google.\nTél. 06 78 86 18 00", "link": "https://lesvieuxmelays.com/", "photo": null, "price": 3800, "title": "Château des Vieux Melays, Neuvy"}], "countries": [{"by": "abdel", "id": "cmvt22tl3j9kh", "name": "Maldives"}, {"by": "abdel", "id": "cmvt22knesw0f", "name": "Oman"}, {"by": "abdel", "id": "cmvt1qpp39bqx", "name": "Malaisie"}, {"by": "abdel", "id": "cmvt29pyo2d4b", "name": "Grèce"}, {"by": "abdel", "id": "cmvt2lot3scz3", "name": "Île Maurice"}]};
+function makeDb(base){
+  const ref = path => { const p = path.split("/"); let r = base; p.forEach((seg,i) => r = (i % 2 === 0) ? r.collection(seg) : r.doc(seg)); return r; };
+  return { doc: ref, collection: ref };
+}
+render();
+(async () => {
+  const board = decodeURIComponent(location.hash.slice(1)).trim();
+  const params = new URLSearchParams(location.search);
+  S.me = params.get("u") === "abdel" ? "abdel" : "nora";
+  const fail = msg => { $("#who").textContent = ""; const n=$("#notice"); n.textContent = msg; n.hidden = false; };
+  if (board.length < 20) return fail("Lien incomplet : ouvrez le lien entier envoyé par Abdel, avec la partie après le #.");
+  if (!window.firebase || FIREBASE_CONFIG.projectId === "A_REMPLIR") return fail("L'app n'est pas encore reliée à sa base de données.");
+  try { firebase.initializeApp(FIREBASE_CONFIG); } catch(e){}
+  const fs = firebase.firestore();
+  try { fs.enablePersistence({synchronizeTabs:true}).catch(()=>{}); } catch(e){}
+  const db = makeDb(fs.collection("boards").doc(board));
+  S.db = db; S.canWrite = true; $("#fab").hidden = false;
+  render();
+  // Première ouverture : reprise des propositions existantes
+  try {
+    const flag = await db.doc("meta/seeded").get();
+    if (!flag.exists){
+      const batch = fs.batch();
+      SEED.props.forEach(p => { const {id, ...data} = p; batch.set(db.doc("props/" + id), data); });
+      batch.set(db.doc("meta/countries"), {list: SEED.countries});
+      batch.set(db.doc("meta/seeded"), {at: Date.now()});
+      await batch.commit();
+    }
+  } catch(e){ if (e && e.code === "permission-denied") return setReadOnly("Ce lien n'est pas valide. Utilisez le lien complet envoyé par Abdel."); }
+  const onErr = e => { if (e && e.code === "permission-denied") setReadOnly("Ce lien n'est pas valide. Utilisez le lien complet envoyé par Abdel."); };
+  db.collection("props").onSnapshot(snap => { S.props = snap.docs.map(d => ({id:d.id, ...d.data()})); render(); }, onErr);
+  db.doc("meta/order").onSnapshot(s => { if (!S.dragging) { S.order = s.exists ? {...s.data()} : {}; render(); } }, onErr);
+  db.doc("meta/chosen").onSnapshot(s => { S.chosen = s.exists ? {...s.data()} : {}; render(); }, onErr);
+  db.doc("meta/budget").onSnapshot(s => { const d = s.exists ? s.data() : {}; S.budget = (typeof d.amount === "number") ? d.amount : null; S.guests = (typeof d.guests === "number" && d.guests > 0) ? d.guests : null; if (!S.editingBudget) render(); }, onErr);
+  db.doc("meta/countries").onSnapshot(s => { if (!S.dragging){ const l = s.exists ? s.data().list : null; S.countries = Array.isArray(l) ? l : []; render(); } }, onErr);
+})();
+</script>
+</body>
+</html>
