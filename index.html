@@ -207,6 +207,7 @@ const CATS = [
   {id:"tenues",  label:"Tenues", short:"Tenues", hint:"Robes, takchita, costume", empty:"Ajoutez une première tenue avec le bouton « Proposer »."},
   {id:"deco",    label:"Décoration", short:"Déco", hint:"Thème, fleurs, table, lumières", empty:"Ajoutez une première idée de décoration avec le bouton « Proposer »."},
   {id:"dot",     label:"Dot", short:"Dot", hint:"Parure et cadeaux du mahr", empty:"Ajoutez une première proposition de parure avec le bouton « Proposer »."},
+  {id:"logement",label:"Appartement", short:"Appart", hint:"Où vivre après le mariage", empty:"Ajoutez un premier appartement avec le bouton « Proposer » : lien de l'annonce, loyer ou prix, surface.", noBudget:true, unit:"mois", ph:"ex. T3 Villeurbanne, 68 m², balcon"},
 ];
 const S = { db:null, user:null, me:null, canWrite:false, props:[], order:{}, chosen:{}, budget:null,
   cat:"walima", dragging:false, pendingRender:false, editingBudget:false, guests:null, countries:[] };
@@ -228,10 +229,13 @@ function propsOf(cat){
   const pos = id => { const i = ord.indexOf(id); return i < 0 ? Infinity : i; };
   return list.sort((a,b) => (pos(a.id) - pos(b.id)) || ((a.createdAt||0) - (b.createdAt||0)));
 }
-function totalOf(p){ if (!p || p.price == null) return null; if (!p.perPerson) return p.price; return S.guests ? p.price * S.guests : null; }
+const unitOf = p => p.unit || (p.perPerson ? "pers" : "total");
+function totalOf(p){ if (!p || p.price == null) return null; const u = unitOf(p); if (u === "mois") return null; if (u === "total") return p.price; return S.guests ? p.price * S.guests : null; }
 function priceHtml(p){
   if (p.price == null) return '<span class="price quote">Sur devis</span>';
-  if (!p.perPerson) return `<span class="price">${eur(p.price)}</span>`;
+  const u = unitOf(p);
+  if (u === "mois") return `<span class="price">${eur(p.price)}/mois</span>`;
+  if (u === "total") return `<span class="price">${eur(p.price)}</span>`;
   const t = totalOf(p);
   return `<span class="price">${eur(p.price)}/pers${t!=null ? `<small>≈ ${eur(t)} pour ${S.guests}</small>` : ""}</span>`;
 }
@@ -250,7 +254,7 @@ function renderWho(){
 function renderBudget(){
   const el = $("#budget");
   let total = 0; const rows = [];
-  CATS.forEach(c => { const p = chosenProp(c.id); const t = totalOf(p); if (t != null) total += t;
+  CATS.filter(c => !c.noBudget).forEach(c => { const p = chosenProp(c.id); const t = totalOf(p); if (t != null) total += t;
     const lbl = !p ? "à choisir" : (t != null ? eur(t) : (p.price == null ? "retenu, sur devis" : `${eur(p.price)}/pers · nombre d'invités ?`));
     rows.push(`<span>${esc(c.short)}</span><span>${lbl}</span>`); });
   const b = S.budget;
@@ -438,12 +442,13 @@ function openSheet(p){
   root.innerHTML = `<div class="sheet-bg" id="sheetBg"><form class="sheet" id="propForm" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <h3 id="sheetTitle">${editing ? "Modifier la proposition" : "Nouvelle proposition"}</h3>
     <div class="field"><label for="f-cat">Catégorie</label><select id="f-cat">${CATS.map(c=>`<option value="${c.id}" ${c.id===(p?.cat||S.cat)?"selected":""}>${esc(c.label)}</option>`).join("")}</select></div>
-    <div class="field"><label for="f-title">Titre</label><input type="text" id="f-title" maxlength="120" required value="${esc(p?.title||"")}" placeholder="ex. Salle Al Andalous, Vaulx-en-Velin"></div>
+    <div class="field"><label for="f-title">Titre</label><input type="text" id="f-title" maxlength="120" required value="${esc(p?.title||"")}" placeholder="${esc((CATS.find(c=>c.id===(p?.cat||S.cat)) || {}).ph || "ex. Hôtel de Paris, Moulins")}"></div>
     <div class="field"><label for="f-desc">Description</label><textarea id="f-desc" maxlength="1500" placeholder="Capacité, ambiance, ce qui vous plaît…">${esc(p?.desc||"")}</textarea></div>
     <div class="field"><label for="f-photo">Photo</label><div class="photo-pick"><img id="f-prev" alt="" ${photo?`src="${esc(photo)}"`:"hidden"}><input type="file" id="f-photo" accept="image/*"><button class="linkbtn" type="button" id="f-rmphoto" ${photo?"":"hidden"}>Retirer la photo</button></div></div>
     <div class="field"><label for="f-link">Lien</label><input type="url" id="f-link" inputmode="url" value="${esc(p?.link||"")}" placeholder="https://…"></div>
-    <div class="field"><label for="f-price">Prix (€) — vide si sur devis</label><input type="number" id="f-price" inputmode="numeric" min="0" step="1" value="${p?.price ?? ""}" placeholder="ex. 4500">
-      <label class="check" for="f-pp"><input type="checkbox" id="f-pp" ${p?.perPerson ? "checked" : ""}> Prix par personne</label></div>
+    <div class="field"><label for="f-price">Prix (€) — vide si sur devis</label>
+      <div class="cform"><input type="number" id="f-price" inputmode="numeric" min="0" step="1" value="${p?.price ?? ""}" placeholder="ex. 4500">
+      <select id="f-unit" aria-label="Unité du prix" style="width:auto">${[["total","au total"],["pers","par personne"],["mois","par mois"]].map(([v,l]) => `<option value="${v}" ${v === (p ? unitOf(p) : (CATS.find(c=>c.id===S.cat).unit || "total")) ? "selected" : ""}>${l}</option>`).join("")}</select></div></div>
     <p class="err" id="f-err" hidden></p>
     <div class="sheet-actions"><button class="btn" type="button" id="f-cancel">Annuler</button><button class="btn primary" type="submit" id="f-save">${editing ? "Enregistrer" : "Ajouter"}</button></div>
   </form></div>`;
@@ -460,7 +465,7 @@ function openSheet(p){
     if (!title){ err.textContent = "Donnez un titre à la proposition."; err.hidden = false; return; }
     let link = $("#f-link").value.trim(); if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
     const pr = $("#f-price").value.trim();
-    const body = { cat: $("#f-cat").value, title, desc: $("#f-desc").value.trim(), link, price: pr === "" ? null : Math.max(0, Number(pr)), perPerson: $("#f-pp").checked,
+    const body = { cat: $("#f-cat").value, title, desc: $("#f-desc").value.trim(), link, price: pr === "" ? null : Math.max(0, Number(pr)), unit: $("#f-unit").value, perPerson: $("#f-unit").value === "pers",
       photo, by: p?.by || S.me, createdAt: p?.createdAt || Date.now() };
     $("#f-save").disabled = true;
     const ref = editing ? S.db.doc("props/" + p.id) : S.db.collection("props").doc();
@@ -474,6 +479,7 @@ $("#fab").onclick = () => openSheet(null);
 
 /* ---------- Démarrage ---------- */
 const SEED = {"props": [{"id": "halal-gastronomie-lyon", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000002, "desc": "Fournisseurs certifiés AVS, SFCVH et Mosquée de Lyon, traçabilité sur demande. Mariages de 20 à 500 convives, service à table ou buffet. Formules 45 €, 65 € (la plus choisie) ou 95 € par personne. Déplacement hors Rhône-Alpes avec supplément : Moulins à demander.", "link": "https://www.halalgastronomie.fr/", "perPerson": true, "photo": null, "price": 65, "title": "Halal Gastronomie, Lyon"}, {"id": "halal-lara-moon", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000004, "desc": "Présenté comme traiteur halal pour mariages. Plutôt buffet sucré-salé, petits fours et pièce montée : en complément d'un traiteur repas. 5/5 sur 76 avis Google. Halal et tarifs à confirmer.\nTél. 06 29 79 87 03", "link": "", "photo": null, "price": null, "title": "Lara Moon Event, Clermont-Ferrand"}, {"id": "halal-maison-levant", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000003, "desc": "Cuisine libanaise, halal indiqué (sans certification précisée). À partir de 45 € par personne : service à table, buffet ou cocktail dînatoire. Se déplace jusqu'à Vichy, Moulins à demander. Contact via la fiche.", "link": "https://www.evenementielpourtous.com/maison-du-levant-144710", "perPerson": true, "photo": null, "price": 45, "title": "Maison du Levant, Chamalières"}, {"id": "halal-nadia-cuisine", "by": "abdel", "cat": "traiteur", "createdAt": 1793247000001, "desc": "Traiteur marocain annoncé 100 % halal, tout fait maison (bastilla, chebakia…). Grand buffet pour mariage. Prix sur devis. Intervient autour de Clermont : déplacement à Moulins (~1 h) à demander.\nTél. / WhatsApp 07 55 83 14 35", "link": "https://www.nadiacuisine.fr/", "photo": null, "price": null, "title": "Nadia Cuisine, Clermont-Ferrand"}, {"id": "moulins-beauvoir", "by": "abdel", "cat": "walima", "createdAt": 1793245600002, "desc": "À ~30 min de Moulins. Week-end à partir de 6 500 €, hébergement non compris (fourchette annoncée 6 500 à 15 000 €). Formule un jour en semaine (mardi ou mercredi) dès 3 800 €. Orangerie jusqu'à 300 assis, logement pour ~60 invités. Pas de cuisine sur place, traiteur libre. Des avis signalent des frais en plus (ménage). 4,7/5 sur 237 avis Google.\nTél. 06 70 04 89 67", "link": "https://www.beauvoir-bourbonnais.fr/", "photo": null, "price": 6500, "title": "Château de Beauvoir, Saint-Pourçain-sur-Besbre"}, {"id": "moulins-domaine-pierre", "by": "abdel", "cat": "walima", "createdAt": 1793245600004, "desc": "À ~20 min de Moulins. Location à partir de 3 000 € (jusqu'à 4 000 €), gîtes compris du vendredi après-midi au lundi matin. Tables, chaises et vaisselle incluses, cuisine pro pour le traiteur. 40 à 130 invités maximum. 4,8/5 sur 23 avis Google.\nTél. 06 32 04 75 45", "link": "https://domainedelapierre.com/", "photo": null, "price": 3000, "title": "Domaine de la Pierre, Thiel-sur-Acolin"}, {"id": "moulins-grange-ecuyer", "by": "abdel", "cat": "walima", "createdAt": 1793245600006, "desc": "À ~15 min de Moulins. Salle vide dès 450 €. Jusqu'à 110 personnes assises (150 en cocktail), gîte sur place. Pour un format plus intime. 4,7/5 sur 47 avis Google.\nTél. 06 82 93 45 30", "link": "", "photo": null, "price": 450, "title": "La Grange de l'Écuyer, Chemilly"}, {"id": "moulins-menards", "by": "abdel", "cat": "walima", "createdAt": 1793245600001, "desc": "À ~20 min de Moulins. Formule mariage 1 250 € du vendredi matin au dimanche soir : salle, tables, chaises, vaisselle. Salle seule dès 600 €, pergola sur devis. 200 personnes en salle, plus la pergola. 14 couchages sur place. Traiteur extérieur autorisé. 4,8/5 sur 124 avis Google.\nTél. 07 84 27 66 54", "link": "https://domainedesmenards.fr", "photo": null, "price": 1250, "title": "Domaine des Ménards, Chevagnes"}, {"id": "moulins-pagats", "by": "abdel", "cat": "walima", "createdAt": 1793245600005, "desc": "À ~40 min de Moulins, vers Vichy. Salle décorée, plusieurs gîtes et espaces extérieurs. Tarif non publié : devis à demander. 4,9/5 sur 49 avis Google.\nTél. 06 19 94 21 24", "link": "", "photo": null, "price": null, "title": "Domaine des Pagats, Montaigu-le-Blin"}, {"id": "moulins-vieux-melays", "by": "abdel", "cat": "walima", "createdAt": 1793245600003, "desc": "À 5 min de Moulins. Location à partir de 3 800 € (fourchette 3 800 à 4 800 €), tables et chaises sur devis. Lieu privatisé, accès la veille pour installer. Jusqu'à 299 invités, parc de 8 ha. Traiteur libre, boissons sans droit de bouchon. 4,7/5 sur 99 avis Google.\nTél. 06 78 86 18 00", "link": "https://lesvieuxmelays.com/", "photo": null, "price": 3800, "title": "Château des Vieux Melays, Neuvy"}], "countries": [{"by": "abdel", "id": "cmvt22tl3j9kh", "name": "Maldives"}, {"by": "abdel", "id": "cmvt22knesw0f", "name": "Oman"}, {"by": "abdel", "id": "cmvt1qpp39bqx", "name": "Malaisie"}, {"by": "abdel", "id": "cmvt29pyo2d4b", "name": "Grèce"}, {"by": "abdel", "id": "cmvt2lot3scz3", "name": "Île Maurice"}]};
+const SEED2 = [{"id": "salle-hotel-de-paris-moulins", "cat": "walima", "title": "Hôtel de Paris, Moulins", "desc": "Salle de réception dans une ancienne chapelle du XIXe siècle restaurée (500 m²), en plein Moulins. 160 assis ou 250 debout, piste de danse, jardin et terrasse pour le vin d'honneur. Location à partir de 4 000 € (fourchette annoncée 4 000 à 10 000 €), hôtel de 28 chambres avec suite nuptiale. Traiteur libre, menus halal possibles. Fin de soirée à 4 h sauf privatisation de l'hôtel.", "link": "https://www.mariages.net/salle-mariage/hotel-de-paris-moulins--e73077", "price": 4000, "unit": "total", "photo": null, "by": "abdel", "createdAt": 1793330000001}, {"id": "salle-casino-royat", "cat": "walima", "title": "Casino de Royat, Clermont-Ferrand", "desc": "Salle de bal au style chic et glamour, terrasse avec vue sur la ville. À ~1 h 15 de Moulins, ~15 min du centre de Clermont. Jusqu'à 230 assis. Formule repas de 79 à 109 € par personne, minimum 40 invités. Traiteur imposé (chef du casino) : halal à faire confirmer. 4,9/5 sur 93 avis Mariages.net. Offre affichée : location de salle offerte pour une réservation avant le 31/10/2026.", "link": "https://www.mariages.net/salle-mariage/casino-de-royat--e128091", "price": 79, "unit": "pers", "perPerson": true, "photo": null, "by": "abdel", "createdAt": 1793330000002}, {"id": "salle-aletti-palace-vichy", "cat": "walima", "title": "Aletti Palace Hôtel, Vichy", "desc": "Palace 4 étoiles du centre de Vichy, ~50 min de Moulins. Salle Napoléon III + salle Strauss (270 m², plafonds de 6 m) jusqu'à 200 invités, ou salon Hortense pour 100. Traiteur imposé (chef de l'hôtel) : halal à demander. Mariages.net affiche « à partir de 27 € » sans préciser l'unité : demander un devis.", "link": "https://www.mariages.net/hotel-mariage/aletti-palace-hotel--e15126", "price": null, "unit": "total", "photo": null, "by": "abdel", "createdAt": 1793330000003}];
 function makeDb(base){
   const ref = path => { const p = path.split("/"); let r = base; p.forEach((seg,i) => r = (i % 2 === 0) ? r.collection(seg) : r.doc(seg)); return r; };
   return { doc: ref, collection: ref };
@@ -501,6 +507,13 @@ render();
       batch.set(db.doc("meta/countries"), {list: SEED.countries});
       batch.set(db.doc("meta/seeded"), {at: Date.now()});
       await batch.commit();
+    }
+    const flag2 = await db.doc("meta/seeded2").get();
+    if (!flag2.exists){
+      const batch2 = fs.batch();
+      SEED2.forEach(p => { const {id, ...data} = p; batch2.set(db.doc("props/" + id), data); });
+      batch2.set(db.doc("meta/seeded2"), {at: Date.now()});
+      await batch2.commit();
     }
   } catch(e){ if (e && e.code === "permission-denied") return setReadOnly("Ce lien n'est pas valide. Utilisez le lien complet envoyé par Abdel."); }
   const onErr = e => { if (e && e.code === "permission-denied") setReadOnly("Ce lien n'est pas valide. Utilisez le lien complet envoyé par Abdel."); };
